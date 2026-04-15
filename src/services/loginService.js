@@ -1,5 +1,5 @@
 import api from "./api";
 
-export const login = (email, password) => {
-  return api.post("/login", { email, password }).then((response) => response.data);
+export const login = (payload) => {
+  return api.post("/doctors/login", payload).then((response) => response.data);
 };
