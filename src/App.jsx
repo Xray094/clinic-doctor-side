@@ -3,6 +3,7 @@ import "./App.css";
 import LoginPage from "./pages/loginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/homePage";
+import ProfilePage from "./pages/profilePage";
 import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
@@ -12,16 +13,25 @@ function App() {
     <Routes>
       <Route
         path="/"
-        element={isAuthenticated ? <Navigate to="/home" replace /> : <LoginPage />}
+        element={isAuthenticated ? <Navigate to="/doctors/dashboard" replace /> : <LoginPage />}
       />
       <Route
-        path="/home"
+        path="/doctors/dashboard"
         element={
           <ProtectedRoute>
             <HomePage />
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/doctors/profile"
+        element={
+          <ProtectedRoute>
+            <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/home" element={<Navigate to="/doctors/dashboard" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -1,49 +1,70 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Calendar,
-  ClipboardCheck,
-  Clock3,
-  Activity,
+  CalendarDays,
+  ClipboardList,
+  CircleCheckBig,
+  LayoutDashboard,
   LogOut,
-  ChevronRight,
+  UserCircle2,
+  Stethoscope,
+  Bell,
+  Sparkles,
+  LoaderCircle,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
+import { useDoctorDashboard } from "../repos/doctorRepo";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore()
+  const { user, logout } = useAuthStore();
+  const { data, isLoading, isError } = useDoctorDashboard();
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("medics-theme");
+    const nextTheme = savedTheme === "light" ? "light" : "dark";
+
+    setTheme(nextTheme);
+    if (nextTheme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+  }, []);
 
   const doctorName = useMemo(() => {
     if (!user) return "Doctor";
     return user.attributes.first_name;
   }, [user]);
 
-  const todayHighlights = [
-    {
-      title: "Appointments Today",
-      value: "18",
-      trend: "+12% this week",
-      icon: <Calendar size={20} />,
-    },
-    {
-      title: "Reports Pending",
-      value: "7",
-      trend: "2 urgent",
-      icon: <ClipboardCheck size={20} />,
-    },
-    {
-      title: "Avg. Consultation",
-      value: "14m",
-      trend: "-2m from yesterday",
-      icon: <Clock3 size={20} />,
-    },
-  ];
+  const stats = {
+    today_appointments: data?.today_appointments ?? 0,
+    pending_appointments: data?.pending_appointments ?? 0,
+    completed_today: data?.completed_today ?? 0,
+  };
 
-  const quickActions = [
-    "Start New Consultation",
-    "Review Critical Labs",
-    "Open e-Prescriptions",
+  const dashboardCards = [
+    {
+      title: "Today's Appointments",
+      value: stats.today_appointments,
+      hint: "Scheduled for this day",
+      icon: <CalendarDays size={20} />,
+    },
+    {
+      title: "Pending Appointments",
+      value: stats.pending_appointments,
+      hint: "Need confirmation or follow-up",
+      icon: <ClipboardList size={20} />,
+    },
+    {
+      title: "Completed Today",
+      value: stats.completed_today,
+      hint: "Marked complete today",
+      icon: <CircleCheckBig size={20} />,
+    },
   ];
 
   const handleLogout = () => {
@@ -51,95 +72,161 @@ export default function HomePage() {
     navigate("/", { replace: true });
   };
 
+  const toggleTheme = () => {
+    setTheme((currentTheme) => {
+      const nextTheme = currentTheme === "dark" ? "light" : "dark";
+
+      localStorage.setItem("medics-theme", nextTheme);
+      if (nextTheme === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+
+      return nextTheme;
+    });
+  };
+
   return (
-    <main className="min-h-screen bg-linear-to-br from-[#f3fbfa] via-white to-[#e8f8f6] px-4 py-6 sm:px-6 lg:px-10">
-      <div className="mx-auto max-w-6xl space-y-6">
-        <section className="relative overflow-hidden rounded-3xl border border-medics-light bg-white p-6 shadow-xl sm:p-8">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-medics-primary/10" />
-          <div className="absolute -bottom-12 -left-12 h-44 w-44 rounded-full bg-medics-secondary/10" />
-
-          <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+    <main
+      className={`h-screen w-full overflow-hidden bg-linear-to-br ${
+        theme === "light"
+          ? "from-medics-bg via-white to-medics-light/60"
+          : "from-medics-bg via-[#122425] to-[#183638]"
+      }`}
+    >
+      <div className="grid h-full w-full gap-4 p-4 lg:grid-cols-[260px_1fr]">
+        <aside className="flex h-full flex-col rounded-3xl border border-medics-light/70 bg-medics-bg/70 p-4 shadow-2xl backdrop-blur-sm">
+          <div className="mb-6 flex items-center gap-3 border-b border-medics-light/40 pb-4">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-linear-to-br from-medics-primary to-medics-secondary text-white shadow-lg shadow-medics-primary/40">
+              <Stethoscope size={20} />
+            </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-medics-secondary">
-                Medics Command Center
-              </p>
-              <h1 className="mt-2 text-2xl font-black text-medics-dark sm:text-4xl">
-                Welcome back, {doctorName}
-              </h1>
-              <p className="mt-2 max-w-xl text-sm font-medium text-[#587a77] sm:text-base">
-                Your schedule is aligned, patient flow is stable, and your critical updates are ready.
-              </p>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-medics-accent">Medics</p>
+              <p className="text-sm font-bold text-medics-dark">Doctor Console</p>
             </div>
-
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-medics-light bg-[#f4fdfc] px-5 py-3 text-sm font-bold text-medics-dark transition-all hover:border-medics-accent hover:bg-white"
-            >
-              <LogOut size={18} />
-              Sign Out
-            </button>
           </div>
-        </section>
 
-        <section className="grid gap-4 md:grid-cols-3">
-          {todayHighlights.map((item) => (
-            <article
-              key={item.title}
-              className="rounded-2xl border border-medics-light bg-white p-5 shadow-sm"
-            >
-              <div className="mb-4 inline-flex rounded-xl bg-medics-bg p-2 text-medics-secondary">
-                {item.icon}
+          <nav className="space-y-2">
+            <button className="flex w-full items-center gap-3 rounded-xl border border-medics-primary/50 bg-medics-primary/20 px-4 py-3 text-left text-sm font-bold text-medics-dark">
+              <LayoutDashboard size={18} />
+              Dashboard
+            </button>
+            <button className="flex w-full items-center gap-3 rounded-xl border border-medics-light/70 bg-medics-bg/30 px-4 py-3 text-left text-sm font-semibold text-medics-accent transition-colors hover:border-medics-secondary/70 hover:text-medics-dark">
+              <CalendarDays size={18} />
+              Appointments
+            </button>
+          </nav>
+
+          <button
+            onClick={handleLogout}
+            className="mt-auto inline-flex w-full items-center justify-center gap-2 rounded-xl border border-medics-light/70 bg-medics-bg/40 px-4 py-3 text-sm font-bold text-medics-dark transition-all hover:border-medics-secondary"
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
+        </aside>
+
+        <section className="h-full overflow-y-auto rounded-3xl border border-medics-light/70 bg-medics-bg/60 p-4 shadow-2xl backdrop-blur-sm sm:p-6">
+          <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.22em] text-medics-secondary">Dashboard</p>
+              <h1 className="mt-2 text-2xl font-black text-medics-dark sm:text-3xl">Welcome back, Dr. {doctorName}</h1>
+              <p className="mt-1 text-sm font-medium text-medics-accent">Your clinic overview for today.</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={toggleTheme}
+                className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
+              >
+                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                {theme === "dark" ? "Light" : "Dark"}
+              </button>
+              <button className="grid h-10 w-10 place-items-center rounded-xl border border-medics-light/60 bg-medics-bg/40 text-medics-accent transition-colors hover:text-medics-dark">
+                <Bell size={16} />
+              </button>
+              <button
+                onClick={() => navigate("/doctors/profile")}
+                className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
+              >
+                <UserCircle2 size={18} />
+                Profile
+              </button>
+            </div>
+          </header>
+
+          {isLoading ? (
+            <div className="grid min-h-70 place-items-center rounded-2xl border border-medics-light/60 bg-medics-bg/30">
+              <div className="flex items-center gap-2 text-sm font-semibold text-medics-accent">
+                <LoaderCircle size={18} className="animate-spin" />
+                Loading dashboard metrics...
               </div>
-              <h2 className="text-sm font-bold text-[#5d7f7c]">{item.title}</h2>
-              <p className="mt-2 text-3xl font-black text-medics-dark">{item.value}</p>
-              <p className="mt-1 text-xs font-semibold text-medics-secondary">{item.trend}</p>
-            </article>
-          ))}
-        </section>
-
-        <section className="grid gap-4 lg:grid-cols-3">
-          <article className="rounded-2xl border border-medics-light bg-white p-6 shadow-sm lg:col-span-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black text-medics-dark">Live Activity</h3>
-              <span className="inline-flex items-center gap-2 rounded-full bg-[#ecf9f8] px-3 py-1 text-xs font-bold text-medics-secondary">
-                <Activity size={14} />
-                Stable
-              </span>
             </div>
-
-            <div className="mt-4 space-y-3">
-              {[
-                "3 new patient check-ins completed",
-                "Lab update received for Room 204",
-                "Follow-up reminder sent to 5 patients",
-              ].map((entry) => (
-                <div
-                  key={entry}
-                  className="rounded-xl border border-medics-light/80 bg-[#f8fdfd] px-4 py-3 text-sm font-medium text-[#486764]"
-                >
-                  {entry}
-                </div>
-              ))}
+          ) : isError ? (
+            <div className="rounded-2xl border border-red-400/30 bg-red-500/10 p-5 text-sm font-semibold text-red-200">
+              Could not load dashboard data. Please try again.
             </div>
-          </article>
+          ) : (
+            <>
+              <section className="grid gap-4 md:grid-cols-3">
+                {dashboardCards.map((card) => (
+                  <article
+                    key={card.title}
+                    className="rounded-2xl border border-medics-light/60 bg-linear-to-b from-medics-bg/30 to-medics-bg/10 p-5"
+                  >
+                    <div className="mb-4 inline-flex rounded-xl bg-medics-primary/15 p-2 text-medics-accent">
+                      {card.icon}
+                    </div>
+                    <h2 className="text-sm font-bold text-medics-secondary">{card.title}</h2>
+                    <p className="mt-2 text-4xl font-black leading-none text-medics-dark">{card.value}</p>
+                    <p className="mt-2 text-xs font-semibold uppercase tracking-wider text-medics-accent/85">{card.hint}</p>
+                  </article>
+                ))}
+              </section>
 
-          <article className="rounded-2xl border border-medics-light bg-white p-6 shadow-sm">
-            <h3 className="text-lg font-black text-medics-dark">Quick Actions</h3>
-            <div className="mt-4 space-y-3">
-              {quickActions.map((action) => (
-                <button
-                  key={action}
-                  className="group flex w-full items-center justify-between rounded-xl border border-medics-light bg-[#f7fdfc] px-4 py-3 text-left text-sm font-bold text-[#416764] transition-all hover:border-medics-accent"
-                >
-                  {action}
-                  <ChevronRight
-                    size={16}
-                    className="text-medics-secondary transition-transform group-hover:translate-x-1"
-                  />
-                </button>
-              ))}
-            </div>
-          </article>
+              <section className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+                <article className="rounded-2xl border border-medics-light/60 bg-medics-bg/20 p-5">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-black text-medics-dark">Today Focus</h3>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-medics-primary/15 px-3 py-1 text-xs font-bold text-medics-accent">
+                      <Sparkles size={13} />
+                      On Track
+                    </span>
+                  </div>
+                  <div className="mt-4 space-y-3">
+                    <div className="rounded-xl border border-medics-light/60 bg-medics-bg/30 px-4 py-3 text-sm font-medium text-medics-accent">
+                      Appointment desk is clear and synced.
+                    </div>
+                    <div className="rounded-xl border border-medics-light/60 bg-medics-bg/30 px-4 py-3 text-sm font-medium text-medics-accent">
+                      Keep follow-up pace steady during afternoon slots.
+                    </div>
+                    <div className="rounded-xl border border-medics-light/60 bg-medics-bg/30 px-4 py-3 text-sm font-medium text-medics-accent">
+                      Review pending appointments from the Appointments tab.
+                    </div>
+                  </div>
+                </article>
+
+                <article className="rounded-2xl border border-medics-light/60 bg-medics-bg/20 p-5">
+                  <h3 className="text-lg font-black text-medics-dark">Status Summary</h3>
+                  <div className="mt-4 space-y-3 text-sm font-semibold">
+                    <div className="flex items-center justify-between rounded-xl border border-medics-light/60 bg-medics-bg/30 px-4 py-3">
+                      <span className="text-medics-secondary">Today</span>
+                      <span className="text-medics-dark">{stats.today_appointments}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-xl border border-medics-light/60 bg-medics-bg/30 px-4 py-3">
+                      <span className="text-medics-secondary">Pending</span>
+                      <span className="text-medics-dark">{stats.pending_appointments}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-xl border border-medics-light/60 bg-medics-bg/30 px-4 py-3">
+                      <span className="text-medics-secondary">Completed</span>
+                      <span className="text-medics-dark">{stats.completed_today}</span>
+                    </div>
+                  </div>
+                </article>
+              </section>
+            </>
+          )}
         </section>
       </div>
     </main>

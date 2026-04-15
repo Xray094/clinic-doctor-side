@@ -34,7 +34,7 @@ export default function LoginPage() {
     const payload = data
     login(payload, {
       onSuccess: () => {
-        navigate("/home");
+        navigate("/doctors/dashboard");
       },
       onError: (error) => {
         console.error("Login failed:", error);
@@ -54,7 +54,7 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-screen font-sans overflow-hidden bg-medics-bg">
       {/* ── LEFT PANEL (Branding) ── */}
-      <div className="hidden lg:flex flex-col justify-between w-5/12 relative overflow-hidden px-10 py-10 bg-gradient-to-br from-medics-primary via-medics-secondary to-medics-bg">
+      <div className="hidden lg:flex flex-col justify-between w-7/12 relative overflow-hidden px-10 py-10 bg-gradient-to-br from-medics-primary via-medics-secondary to-medics-bg">
         {/* Abstract Background Shapes */}
         <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/10 pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
@@ -96,7 +96,7 @@ export default function LoginPage() {
         </div>
 
         {/* Features List */}
-        <div className="relative z-10 space-y-3">
+        <div className="relative z-10 space-y-1">
           {[
             { icon: <Calendar size={18} />, label: "Smart Scheduling" },
             { icon: <Pill size={18} />, label: "e-Prescriptions" },
@@ -104,10 +104,10 @@ export default function LoginPage() {
           ].map((f, i) => (
             <div
               key={i}
-              className="flex items-center gap-3 rounded-xl px-4 py-3 bg-white/10 backdrop-blur-md"
+              className="flex items-center gap-3 px-2 py-2 border-b border-white/15 last:border-b-0 "
             >
-              <span className="text-white">{f.icon}</span>
-              <span className="text-white text-sm font-bold">{f.label}</span>
+              <span className="text-white/70">{f.icon}</span>
+              <span className="text-white/85 font-semibold tracking-wide">{f.label}</span>
             </div>
           ))}
         </div>
