@@ -44,6 +44,55 @@
     }
   }
 }
+
+.medics-toast-container {
+  width: min(92vw, 420px);
+  padding: 0 0.4rem;
+}
+
+.Toastify__toast.medics-toast {
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--medics-light) 70%, transparent);
+  background:
+    radial-gradient(circle at top right, rgb(99 180 182 / 16%), transparent 52%),
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--medics-bg) 90%, black 10%),
+      color-mix(in srgb, var(--medics-primary) 34%, var(--medics-bg) 66%)
+    );
+  color: var(--medics-dark);
+  box-shadow: 0 14px 30px rgb(14 26 27 / 28%);
+  min-height: 64px;
+  margin-bottom: 0.8rem;
+  backdrop-filter: blur(6px);
+}
+
+.Toastify__toast--error.medics-toast {
+  border-color: color-mix(in srgb, #ef4444 42%, var(--medics-light) 58%);
+}
+
+.Toastify__toast-body.medics-toast-body {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.medics-toast-progress {
+  height: 4px;
+  background: linear-gradient(90deg, var(--medics-accent), var(--medics-secondary));
+}
+
+:root[data-theme="light"] .Toastify__toast.medics-toast {
+  background:
+    radial-gradient(circle at top right, rgb(76 164 166 / 12%), transparent 58%),
+    linear-gradient(135deg, rgb(255 255 255 / 97%), rgb(238 247 247 / 96%));
+  color: var(--medics-dark);
+  box-shadow: 0 12px 26px rgb(23 55 57 / 14%);
+}
+
 /* :root {
   --text: #6b6375;
   --text-h: #08060d;
