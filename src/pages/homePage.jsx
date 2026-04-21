@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   CalendarDays,
   ClipboardList,
   CircleCheckBig,
   LayoutDashboard,
+  MessageSquare,
   LogOut,
   UserCircle2,
   Stethoscope,
@@ -16,12 +17,15 @@ import {
 } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 import { useDoctorDashboard } from "../repos/doctorRepo";
+import ChatWorkspace from "../components/ChatWorkspace";
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuthStore();
   const { data, isLoading, isError } = useDoctorDashboard();
   const [theme, setTheme] = useState("dark");
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("medics-theme");
@@ -34,6 +38,13 @@ export default function HomePage() {
       document.documentElement.removeAttribute("data-theme");
     }
   }, []);
+
+  useEffect(() => {
+    if (location.state?.openChat) {
+      setActiveTab("chat");
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const doctorName = useMemo(() => {
     if (!user) return "Doctor";
@@ -108,13 +119,31 @@ export default function HomePage() {
           </div>
 
           <nav className="space-y-2">
-            <button className="flex w-full items-center gap-3 rounded-xl border border-medics-primary/50 bg-medics-primary/20 px-4 py-3 text-left text-sm font-bold text-medics-dark">
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-bold ${
+                activeTab === "dashboard"
+                  ? "border-medics-primary/50 bg-medics-primary/20 text-medics-dark"
+                  : "border-medics-light/70 bg-medics-bg/30 text-medics-accent hover:border-medics-secondary/70 hover:text-medics-dark"
+              }`}
+            >
               <LayoutDashboard size={18} />
               Dashboard
             </button>
             <button className="flex w-full items-center gap-3 rounded-xl border border-medics-light/70 bg-medics-bg/30 px-4 py-3 text-left text-sm font-semibold text-medics-accent transition-colors hover:border-medics-secondary/70 hover:text-medics-dark">
               <CalendarDays size={18} />
               Appointments
+            </button>
+            <button
+              onClick={() => setActiveTab("chat")}
+              className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors ${
+                activeTab === "chat"
+                  ? "border-medics-primary/50 bg-medics-primary/20 text-medics-dark"
+                  : "border-medics-light/70 bg-medics-bg/30 text-medics-accent hover:border-medics-secondary/70 hover:text-medics-dark"
+              }`}
+            >
+              <MessageSquare size={18} />
+              Chat
             </button>
           </nav>
 
@@ -156,7 +185,9 @@ export default function HomePage() {
             </div>
           </header>
 
-          {isLoading ? (
+          {activeTab === "chat" ? (
+            <ChatWorkspace />
+          ) : isLoading ? (
             <div className="grid min-h-70 place-items-center rounded-2xl border border-medics-light/60 bg-medics-bg/30">
               <div className="flex items-center gap-2 text-sm font-semibold text-medics-accent">
                 <LoaderCircle size={18} className="animate-spin" />

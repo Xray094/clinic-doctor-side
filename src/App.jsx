@@ -4,6 +4,7 @@ import LoginPage from "./pages/loginPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/homePage";
 import ProfilePage from "./pages/profilePage";
+import PatientProfilePage from "./pages/patientProfilePage";
 import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
         element={
           <ProtectedRoute>
             <ProfilePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/patients/:patientId"
+        element={
+          <ProtectedRoute>
+            <PatientProfilePage />
           </ProtectedRoute>
         }
       />
