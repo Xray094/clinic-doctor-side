@@ -157,33 +157,35 @@ export default function HomePage() {
         </aside>
 
         <section className="h-full overflow-y-auto rounded-3xl border border-medics-light/70 bg-medics-bg/60 p-4 shadow-2xl backdrop-blur-sm sm:p-6">
-          <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-medics-secondary">Dashboard</p>
-              <h1 className="mt-2 text-2xl font-black text-medics-dark sm:text-3xl">Welcome back, Dr. {doctorName}</h1>
-              <p className="mt-1 text-sm font-medium text-medics-accent">Your clinic overview for today.</p>
-            </div>
+          {activeTab !== "chat" && (
+            <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-medics-secondary">Dashboard</p>
+                <h1 className="mt-2 text-2xl font-black text-medics-dark sm:text-3xl">Welcome back, Dr. {doctorName}</h1>
+                <p className="mt-1 text-sm font-medium text-medics-accent">Your clinic overview for today.</p>
+              </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={toggleTheme}
-                className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
-              >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-                {theme === "dark" ? "Light" : "Dark"}
-              </button>
-              <button className="grid h-10 w-10 place-items-center rounded-xl border border-medics-light/60 bg-medics-bg/40 text-medics-accent transition-colors hover:text-medics-dark">
-                <Bell size={16} />
-              </button>
-              <button
-                onClick={() => navigate("/doctors/profile")}
-                className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
-              >
-                <UserCircle2 size={18} />
-                Profile
-              </button>
-            </div>
-          </header>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleTheme}
+                  className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
+                >
+                  {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                  {theme === "dark" ? "Light" : "Dark"}
+                </button>
+                <button className="grid h-10 w-10 place-items-center rounded-xl border border-medics-light/60 bg-medics-bg/40 text-medics-accent transition-colors hover:text-medics-dark">
+                  <Bell size={16} />
+                </button>
+                <button
+                  onClick={() => navigate("/doctors/profile")}
+                  className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
+                >
+                  <UserCircle2 size={18} />
+                  Profile
+                </button>
+              </div>
+            </header>
+          )}
 
           {activeTab === "chat" ? (
             <ChatWorkspace />
