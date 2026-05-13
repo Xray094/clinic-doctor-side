@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from "../store/useAuthStore";
 import { useDoctorDashboard } from "../repos/doctorRepo";
 import ChatWorkspace from "../components/ChatWorkspace";
+import { useChatWorkspace } from "../hooks/useChatWorkspace";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -26,6 +27,8 @@ export default function HomePage() {
   const { data, isLoading, isError } = useDoctorDashboard();
   const [theme, setTheme] = useState("dark");
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const chatWorkspace = useChatWorkspace({ isChatOpen: activeTab === "chat" });
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("medics-theme");
@@ -83,6 +86,19 @@ export default function HomePage() {
     navigate("/", { replace: true });
   };
 
+  const unreadNotificationCount = Object.values(chatWorkspace.unreadMap).filter(Boolean).length;
+
+  const openChatFromNotification = (patientId) => {
+    const targetPatient = chatWorkspace.sortedPatients.find((patient) => String(patient.id) === String(patientId));
+
+    if (targetPatient) {
+      chatWorkspace.selectPatient(targetPatient);
+    }
+
+    setNotificationsOpen(false);
+    setActiveTab("chat");
+  };
+
   const toggleTheme = () => {
     setTheme((currentTheme) => {
       const nextTheme = currentTheme === "dark" ? "light" : "dark";
@@ -135,7 +151,10 @@ export default function HomePage() {
               Appointments
             </button>
             <button
-              onClick={() => setActiveTab("chat")}
+              onClick={() => {
+                setActiveTab("chat");
+                setNotificationsOpen(false);
+              }}
               className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-semibold transition-colors ${
                 activeTab === "chat"
                   ? "border-medics-primary/50 bg-medics-primary/20 text-medics-dark"
@@ -144,6 +163,11 @@ export default function HomePage() {
             >
               <MessageSquare size={18} />
               Chat
+              {unreadNotificationCount > 0 && (
+                <span className="ml-auto inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                  {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                </span>
+              )}
             </button>
           </nav>
 
@@ -173,9 +197,49 @@ export default function HomePage() {
                   {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
                   {theme === "dark" ? "Light" : "Dark"}
                 </button>
-                <button className="grid h-10 w-10 place-items-center rounded-xl border border-medics-light/60 bg-medics-bg/40 text-medics-accent transition-colors hover:text-medics-dark">
-                  <Bell size={16} />
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setNotificationsOpen((current) => !current)}
+                    className="relative grid h-10 w-10 place-items-center rounded-xl border border-medics-light/60 bg-medics-bg/40 text-medics-accent transition-colors hover:text-medics-dark"
+                    aria-label="Chat notifications"
+                  >
+                    <Bell size={16} />
+                    {unreadNotificationCount > 0 && (
+                      <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white">
+                        {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {notificationsOpen && (
+                    <div className="absolute right-0 top-12 z-20 w-80 rounded-2xl border border-medics-light/70 bg-medics-bg/95 p-3 shadow-2xl backdrop-blur-md">
+                      <div className="mb-2 flex items-center justify-between border-b border-medics-light/50 pb-2">
+                        <p className="text-sm font-black text-medics-dark">Chat notifications</p>
+                        <span className="text-[11px] font-semibold text-medics-accent">{chatWorkspace.notifications.length} recent</span>
+                      </div>
+
+                      <div className="max-h-72 space-y-2 overflow-y-auto pr-1">
+                        {chatWorkspace.notifications.length ? (
+                          chatWorkspace.notifications.map((notification) => (
+                            <button
+                              key={notification.id}
+                              onClick={() => openChatFromNotification(notification.patientId)}
+                              className="w-full rounded-xl border border-medics-light/60 bg-medics-bg/35 px-3 py-2 text-left transition-colors hover:border-medics-secondary"
+                            >
+                              <p className="text-xs font-bold text-medics-secondary">{notification.title}</p>
+                              <p className="mt-1 line-clamp-2 text-xs text-medics-accent">{notification.body}</p>
+                              <p className="mt-1 text-[10px] font-semibold text-medics-accent/80">{notification.at}</p>
+                            </button>
+                          ))
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-medics-light/70 px-3 py-5 text-center text-xs font-semibold text-medics-accent">
+                            No chat notifications yet.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => navigate("/doctors/profile")}
                   className="inline-flex items-center gap-2 rounded-xl border border-medics-light/60 bg-medics-bg/40 px-3 py-2 text-sm font-semibold text-medics-dark transition-all hover:border-medics-secondary"
@@ -188,7 +252,7 @@ export default function HomePage() {
           )}
 
           {activeTab === "chat" ? (
-            <ChatWorkspace />
+            <ChatWorkspace workspace={chatWorkspace} />
           ) : isLoading ? (
             <div className="grid min-h-70 place-items-center rounded-2xl border border-medics-light/60 bg-medics-bg/30">
               <div className="flex items-center gap-2 text-sm font-semibold text-medics-accent">

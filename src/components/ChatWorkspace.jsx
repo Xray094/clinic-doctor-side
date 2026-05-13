@@ -1,10 +1,9 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, UserCircle2, Send, LoaderCircle, Bell, CircleDot } from "lucide-react";
-import { useChatWorkspace } from "../hooks/useChatWorkspace";
 import { getPatientIdentity } from "../utils/patientUtils";
 
-export default function ChatWorkspace() {
+export default function ChatWorkspace({ workspace }) {
   const navigate = useNavigate();
   const {
     searchId,
@@ -22,7 +21,7 @@ export default function ChatWorkspace() {
     isLoadingMessages,
     handleSearchById,
     handleSendMessage,
-  } = useChatWorkspace();
+  } = workspace;
 
   const messageBottomRef = useRef(null);
   const selectedPatientName = selectedPatient ? getPatientIdentity(selectedPatient).name : "";

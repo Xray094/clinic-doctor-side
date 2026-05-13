@@ -33,7 +33,7 @@ async function fetchMessagesForPatient(patientId) {
   return normalizeMessagesPayload(response);
 }
 
-export function useChatWorkspace() {
+export function useChatWorkspace({ isChatOpen = true } = {}) {
   const queryClient = useQueryClient();
   const seenLatestByPatientRef = useRef({});
 
@@ -189,7 +189,7 @@ export function useChatWorkspace() {
         if (!last || last.isMine) return;
 
         const previousSeen = seenLatestByPatientRef.current[patient.id];
-        if (previousSeen && previousSeen !== last.id && String(selectedPatientId) !== String(patient.id)) {
+        if (previousSeen && previousSeen !== last.id && (!isChatOpen || String(selectedPatientId) !== String(patient.id))) {
           setUnreadMap((prev) => ({ ...prev, [patient.id]: true }));
           notifyIncoming(patient, last.body);
         }
@@ -199,7 +199,7 @@ export function useChatWorkspace() {
     }, INBOX_POLL_MS);
 
     return () => clearInterval(timer);
-  }, [queryClient, sourcePatients, selectedPatientId]);
+  }, [queryClient, sourcePatients, selectedPatientId, isChatOpen]);
 
   return {
     searchId,
