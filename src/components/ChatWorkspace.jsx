@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, UserCircle2, Send, LoaderCircle, Bell, CircleDot } from "lucide-react";
 import { getPatientIdentity } from "../utils/patientUtils";
+import { useAuthStore } from "../store/useAuthStore";
 
 export default function ChatWorkspace({ workspace }) {
   const navigate = useNavigate();
+  const currentUserId = useAuthStore((state) => state.user?.id);
   const {
     searchId,
     setSearchId,
@@ -146,16 +148,23 @@ export default function ChatWorkspace({ workspace }) {
                 </div>
               ) : (
                 messages.map((msg) => (
-                  <div key={msg.id} className={`flex ${msg.isMine ? "justify-end" : "justify-start"}`}>
+                  <div
+                    key={msg.id}
+                    className={`flex ${String(msg.sender_user_id) === String(currentUserId) ? "justify-end" : "justify-start"}`}
+                  >
                     <div
                       className={`max-w-[74%] rounded-2xl px-3 py-2 text-sm ${
-                        msg.isMine
+                        String(msg.sender_user_id) === String(currentUserId)
                           ? "bg-medics-primary text-white"
                           : "border border-medics-light/60 bg-medics-bg/40 text-medics-dark"
                       }`}
                     >
                       <p>{msg.body}</p>
-                      <p className={`mt-1 text-[10px] font-semibold ${msg.isMine ? "text-white/80" : "text-medics-accent"}`}>
+                      <p
+                        className={`mt-1 text-[10px] font-semibold ${
+                          String(msg.sender_user_id) === String(currentUserId) ? "text-white/80" : "text-medics-accent"
+                        }`}
+                      >
                         {msg.time}
                       </p>
                     </div>
